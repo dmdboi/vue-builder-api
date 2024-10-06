@@ -46,8 +46,33 @@ const renderPageHTML = async data => {
   return template(data.data);
 };
 
+const findAllComponents = async node => {
+  if (node && typeof node.content[0] === "string") {
+    console.log("End node", node);
+    return {
+      type: node.type,
+      name: node.name,
+      content: node.content,
+      isEndNode: true,
+    };
+  }
+
+  if (node && typeof node.content[0] === "object") {
+    console.log("Node with children", node);
+    return {
+      type: node.type,
+      name: node.name || node.type,
+      children: await Promise.all(node.content.map(async childNode => await findAllComponents(childNode))),
+      isEndNode: false,
+    };
+  }
+
+  return null;
+};
+
 module.exports = {
   getComponentsInTemplate,
   replaceComponentRefs,
   renderPageHTML,
+  findAllComponents,
 };
