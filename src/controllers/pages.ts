@@ -1,7 +1,9 @@
-const Content = require("../models/Content");
-const { getComponentsInTemplate, replaceComponentRefs, renderPageHTML } = require("../libs/template");
+import { Request, Response } from "express";
 
-const getPageByRef = async (req, res) => {
+import Content from "../models/Content";
+import { getComponentsInTemplate, replaceComponentRefs, renderPageHTML } from "../libs/template";
+
+const getPageByRef = async (req: Request, res: Response) => {
   const ref = req.params.ref;
 
   // Find the content in MongoDB
@@ -10,7 +12,7 @@ const getPageByRef = async (req, res) => {
   const components = await getComponentsInTemplate(data);
 
   if (components.message === "Error") {
-    return res.status(404).json(components);
+    res.status(404).json(components);
   }
 
   data = await replaceComponentRefs(data, components.components);
@@ -18,14 +20,14 @@ const getPageByRef = async (req, res) => {
   // Turn the page content into HTML
   const html = await renderPageHTML(data);
 
-  return res.status(200).json({
+  res.status(200).json({
     message: "Success",
     data,
     html,
   });
 };
 
-const getPageHTMLByRef = async (req, res) => {
+const getPageHTMLByRef = async (req: Request, res: Response) => {
   const ref = req.params.ref;
 
   // Find the content in MongoDB
@@ -34,7 +36,7 @@ const getPageHTMLByRef = async (req, res) => {
   const components = await getComponentsInTemplate(data);
 
   if (components.message === "Error") {
-    return res.status(404).json(components);
+    res.status(404).json(components);
   }
 
   data = await replaceComponentRefs(data, components.components);
@@ -42,12 +44,7 @@ const getPageHTMLByRef = async (req, res) => {
   // Turn the page content into HTML
   const html = await renderPageHTML(data);
 
-  console.log(html);
-
-  return res.status(200).send(html);
+  res.status(200).send(html);
 };
 
-module.exports = {
-  getPageByRef,
-  getPageHTMLByRef,
-};
+export { getPageByRef, getPageHTMLByRef };

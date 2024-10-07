@@ -11,4 +11,4 @@ const Content = new Schema({
   data: Object,
 });
 
-module.exports = mongoose.model("Content", Content);
+export default mongoose.model("Content", Content);
