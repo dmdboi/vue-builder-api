@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-import Content from "../../models/Content";
+import Content from "../../models/Component";
 
 async function list(req: Request, res: Response) {
   const type = req.params.type;

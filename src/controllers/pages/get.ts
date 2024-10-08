@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-import Content from "../../models/Content";
+import Content from "../../models/Component";
 import Page from "../../models/Page";
 
 import { getComponentsInTemplate, renderPageHTML, replaceComponentRefs } from "../../libs/template";

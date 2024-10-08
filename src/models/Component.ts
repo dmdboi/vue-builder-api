@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 /** Components */
-const Content = new Schema({
+const Component = new Schema({
   type: String,
   id: String,
   ref: String,
@@ -12,4 +12,4 @@ const Content = new Schema({
   data: Object,
 });
 
-export default mongoose.model("Content", Content);
+export default mongoose.model("Component", Component);

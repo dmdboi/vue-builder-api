@@ -1,11 +1,11 @@
 import { JSONToHTML } from "html-to-json-parser";
 import ejs from "ejs";
 
-import Content from "../models/Content";
+import Content from "../models/Component";
 import { ContentBody, RepeatableData } from "../types/Content";
 
 /**
- * Get all components in a template.
+ * Get all components in a page.
  * @param data
  * @returns
  */
@@ -62,36 +62,6 @@ const renderPageHTML = async (data: any) => {
   // Replace template variables with actual data
   const template = ejs.compile(tempHTML as string);
   return template(data.data);
-};
-
-/**
- * Recursively find all components in a content object and return them in a structured format.
- * @param node
- * @returns
- * @deprecated This function is not used in the current implementation.
- */
-const findAllComponents = async (node: any) => {
-  if (node && typeof node.content[0] === "string") {
-    console.log("End node", node);
-    return {
-      type: node.type,
-      name: node.name,
-      content: node.content,
-      isEndNode: true,
-    };
-  }
-
-  if (node && typeof node.content[0] === "object") {
-    console.log("Node with children", node);
-    return {
-      type: node.type,
-      name: node.name || node.type,
-      children: await Promise.all(node.content.map(async (childNode: any) => await findAllComponents(childNode))),
-      isEndNode: false,
-    };
-  }
-
-  return null;
 };
 
 /**
@@ -195,4 +165,4 @@ const insertRepeatableContent = async (contentArray: Array<string | ContentBody>
   return contentArray; // Return the updated content array
 };
 
-export { getComponentsInTemplate, replaceComponentRefs, renderPageHTML, findAllComponents, findRepeatableContent, buildRepeatableContent, insertRepeatableContent };
+export { getComponentsInTemplate, replaceComponentRefs, renderPageHTML, findRepeatableContent, buildRepeatableContent, insertRepeatableContent };
