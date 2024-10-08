@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import ULID from "ulid";
-import Content from "../../models/Content";
+
+import Template from "../../models/Template";
 
 async function store(req: Request, res: Response) {
   // Check that type is set to "page"
@@ -11,18 +12,15 @@ async function store(req: Request, res: Response) {
     });
   }
 
-  // Build component content
-  const component = {
+  // Save template to MongoDB
+  const template = await Template.create({
     id: ULID.ulid(),
     ...req.body,
-  };
-
-  // Save template to MongoDB
-  await Content.create(component);
+  });
 
   res.status(200).json({
     message: "Success",
-    data: component,
+    data: template,
   });
 }
 

@@ -4,6 +4,11 @@ import ejs from "ejs";
 import Content from "../models/Content";
 import { ContentBody, RepeatableData } from "../types/Content";
 
+/**
+ * Get all components in a template.
+ * @param data
+ * @returns
+ */
 const getComponentsInTemplate = async (data: any) => {
   const componentRefs = data.content[0].content.filter((c: any) => c.type === "component");
 
@@ -22,6 +27,12 @@ const getComponentsInTemplate = async (data: any) => {
   return { message: "Success", components };
 };
 
+/**
+ * Replace component references in a page with the actual component data.
+ * @param data
+ * @param components
+ * @returns
+ */
 const replaceComponentRefs = async (data: any, components: any) => {
   // Replace the component refs with the actual component data in page.content
   data.content[0].content = await Promise.all(
@@ -39,6 +50,11 @@ const replaceComponentRefs = async (data: any, components: any) => {
   return data;
 };
 
+/**
+ * Render the given page data into HTML using ejs templates.
+ * @param data
+ * @returns
+ */
 const renderPageHTML = async (data: any) => {
   // Turn the page content into HTML
   const tempHTML = await JSONToHTML(data.content[0]);
@@ -48,6 +64,12 @@ const renderPageHTML = async (data: any) => {
   return template(data.data);
 };
 
+/**
+ * Recursively find all components in a content object and return them in a structured format.
+ * @param node
+ * @returns
+ * @deprecated This function is not used in the current implementation.
+ */
 const findAllComponents = async (node: any) => {
   if (node && typeof node.content[0] === "string") {
     console.log("End node", node);
@@ -146,6 +168,9 @@ const buildRepeatableContent = async (template: ContentBody, data: RepeatableDat
   };
 };
 
+/**
+ * Insert repeatable content into the content array.
+ */
 const insertRepeatableContent = async (contentArray: Array<string | ContentBody>, repeatableContent: ContentBody[], repeatableKey: string) => {
   // Helper function to recursively traverse content fields, keeping track of the parent
   function traverseContent(content: string | ContentBody, parent: ContentBody | null = null, parentIndex: number | null = null) {

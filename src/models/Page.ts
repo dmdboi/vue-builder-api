@@ -23,6 +23,9 @@ const Page = new Schema({
 
   // Template ID
   template: String,
+
+  // Slot to insert the page content into
+  slot: String,
 });
 
 export default mongoose.model("Page", Page);

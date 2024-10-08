@@ -32,7 +32,7 @@ interface RepeatableData {
 
 interface StoreContentRequest {
   name: string;
-  type: "page" | "component" | "template";
+  type: "component" | "template";
   content: ContentBody[];
   data: ContentData;
 }

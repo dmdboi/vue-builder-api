@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
 
-import Content from "../../models/Content";
 import { renderPageHTML } from "../../libs/template";
+import Template from "../../models/Template";
 
 async function get(req: Request, res: Response) {
   const { id } = req.params;
 
   // Find the content in MongoDB
-  let data = await Content.findOne({ type: "template", id: id });
+  let data = await Template.findOne({ id: id });
 
   res.status(200).json({
     message: "Success",
@@ -19,7 +19,7 @@ async function getHTML(req: Request, res: Response) {
   const { id } = req.params;
 
   // Find the content in MongoDB
-  let data = await Content.findOne({ type: "page", id: id });
+  let data = await Template.findOne({ id: id });
 
   // Turn the page content into HTML
   const html = await renderPageHTML(data);
