@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
 
-import Content from "../models/Content";
-import { getComponentsInTemplate, replaceComponentRefs, renderPageHTML } from "../libs/template";
+import Content from "../../models/Content";
+import { getComponentsInTemplate, renderPageHTML, replaceComponentRefs } from "../../libs/template";
 
-const getPageByRef = async (req: Request, res: Response) => {
-  const ref = req.params.ref;
+async function get(req: Request, res: Response) {
+  const { id } = req.params;
 
   // Find the content in MongoDB
-  let data = await Content.findOne({ type: "page", ref: ref });
+  let data = await Content.findOne({ type: "page", id: id });
 
   const components = await getComponentsInTemplate(data);
 
@@ -17,21 +17,17 @@ const getPageByRef = async (req: Request, res: Response) => {
 
   data = await replaceComponentRefs(data, components.components);
 
-  // Turn the page content into HTML
-  const html = await renderPageHTML(data);
-
   res.status(200).json({
     message: "Success",
     data,
-    html,
   });
-};
+}
 
-const getPageHTMLByRef = async (req: Request, res: Response) => {
-  const ref = req.params.ref;
+async function getHTML(req: Request, res: Response) {
+  const { id } = req.params;
 
   // Find the content in MongoDB
-  let data = await Content.findOne({ type: "page", ref: ref });
+  let data = await Content.findOne({ type: "page", id: id });
 
   const components = await getComponentsInTemplate(data);
 
@@ -45,6 +41,6 @@ const getPageHTMLByRef = async (req: Request, res: Response) => {
   const html = await renderPageHTML(data);
 
   res.status(200).send(html);
-};
+}
 
-export { getPageByRef, getPageHTMLByRef };
+export { get, getHTML };

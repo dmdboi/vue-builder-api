@@ -2,11 +2,11 @@ import store from "./store";
 import list from "./list";
 import { get, getHTML } from "./get";
 
-const ContentController = {
+const ComponentController = {
   store,
   list,
   get,
   getHTML,
 };
 
-export default ContentController;
+export default ComponentController;
