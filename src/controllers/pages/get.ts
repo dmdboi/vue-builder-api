@@ -2,12 +2,13 @@ import { Request, Response } from "express";
 
 import Content from "../../models/Content";
 import { getComponentsInTemplate, renderPageHTML, replaceComponentRefs } from "../../libs/template";
+import Page from "../../models/Page";
 
 async function get(req: Request, res: Response) {
   const { id } = req.params;
 
   // Find the content in MongoDB
-  let data = await Content.findOne({ type: "page", id: id });
+  let data = await Page.findOne({ id: id });
 
   const components = await getComponentsInTemplate(data);
 

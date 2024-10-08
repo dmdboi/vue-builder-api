@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import ULID from "ulid";
+import Page from "../../models/Page";
 
 async function store(req: Request, res: Response) {
   // Check that type is set to "page"
@@ -15,6 +16,9 @@ async function store(req: Request, res: Response) {
     id: ULID.ulid(),
     ...req.body,
   };
+
+  // Save page to MongoDB
+  await Page.create(component);
 
   res.status(200).json({
     message: "Success",

@@ -2,6 +2,8 @@
 
 - [X] Page CRUD endpoints
 - [X] Template CRUD endpoints
+- [X] Page model
+- [ ] Insert page content into template
 - [ ] Support for Users and Teams
 - [ ] Site model to store site-wide settings (e.g. site name, description, meta tags)
 - [ ] File upload support (local, R2 or S3 storage)
