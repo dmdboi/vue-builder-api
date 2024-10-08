@@ -13,8 +13,8 @@ router.get("/components/:id/html", ComponentController.getHTML);
 
 router.get("/pages", PageController.list);
 router.post("/pages", PageController.store);
-router.get("/pages/:ref", PageController.get);
-router.get("/pages/:ref/html", PageController.getHTML);
+router.get("/pages/:id", PageController.get);
+router.get("/pages/:id/html", PageController.getHTML);
 
 router.get("/templates", TemplateController.list);
 router.post("/templates", TemplateController.store);
