@@ -1,12 +1,10 @@
 import { Request, Response } from "express";
 
-import Content from "../../models/Component";
+import Component from "../../models/Component";
 
 async function list(req: Request, res: Response) {
-  const type = req.params.type;
-
   // Find all content in MongoDB
-  const data = await Content.find({ type: type });
+  const data = await Component.find({ type: "component" });
 
   res.status(200).json({ message: "Success", data });
 }

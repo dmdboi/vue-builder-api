@@ -26,4 +26,26 @@ async function store(req: Request, res: Response) {
   });
 }
 
-export default store;
+async function update(req: Request, res: Response) {
+  const { id } = req.params;
+
+  // Find the page by ID
+  const page = await Page.findOne({ id: id });
+
+  if (!page) {
+    res.status(404).json({
+      message: "Error",
+      error: "Page not found",
+    });
+  }
+
+  // Update the page in MongoDB
+  await Page.updateOne({ id: id }, req.body);
+
+  res.status(200).json({
+    message: "Success",
+    data: req.body,
+  });
+}
+
+export { store, update };

@@ -7,7 +7,7 @@ async function get(req: Request, res: Response) {
   const { id } = req.params;
 
   // Find all content in MongoDB
-  const data = await Content.find({ id: id });
+  const data = await Content.findOne({ id: id });
 
   res.status(200).json({ message: "Success", data });
 }

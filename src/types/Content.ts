@@ -3,9 +3,8 @@ interface Content {
   name: string;
   ref: string;
   type: "page" | "component" | "template";
-  content: Content[] | string[];
-  data: Record<string, any>;
-  html: string;
+  content?: Content[] | string[];
+  data?: Record<string, any>;
 }
 
 interface ContentBody {
@@ -18,7 +17,7 @@ interface ContentBody {
     style?: string;
     class?: string;
   };
-  content: Array<string | ContentBody>;
+  content: ContentBody[] | string[];
 }
 
 interface ContentData {

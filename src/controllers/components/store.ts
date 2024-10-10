@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import ULID from "ulid";
 
-import { buildRepeatableContent, findRepeatableContent, insertRepeatableContent } from "../../libs/template";
+import { buildRepeatableContent, findRepeatableContent, insertRepeatableContent } from "../../libs/components";
 
 async function store(req: Request, res: Response) {
   const results = await findRepeatableContent(req.body.content);
@@ -18,6 +18,7 @@ async function store(req: Request, res: Response) {
   // Build component content
   const component = {
     ...req.body,
+    type: "component",
     id: ULID.ulid(),
     content: flatOutputResult,
   };

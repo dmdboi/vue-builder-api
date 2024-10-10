@@ -3,7 +3,9 @@ import { Request, Response } from "express";
 import Content from "../../models/Component";
 import Page from "../../models/Page";
 
-import { getComponentsInTemplate, renderPageHTML, replaceComponentRefs } from "../../libs/template";
+import { getComponentsInTemplate, replaceComponentRefs } from "../../libs/template";
+import { renderPageHTML } from "../../libs/renderer";
+import Component from "../../models/Component";
 
 async function get(req: Request, res: Response) {
   const { id } = req.params;
@@ -11,39 +13,23 @@ async function get(req: Request, res: Response) {
   // Find the content in MongoDB
   let page = await Page.findOne({ id: id });
 
-  const components = await getComponentsInTemplate(page);
-
-  if (components.message === "Error") {
-    res.status(404).json(components);
+  if (!page) {
+    res.status(404).json({
+      message: "Error",
+      error: "Page not found",
+    });
   }
 
-  page = await replaceComponentRefs(page, components.components);
+  const results = await getComponentsInTemplate(page.content);
 
-  // If the page has a template, get the template data
-  if (page.template) {
-    let template = await Content.findOne({ type: "template", ref: page.ref });
+  if (results.message === "Error") {
+    res.status(404).json(results);
+  }
 
-    // Get the components in the template
-    const templateComponents = await getComponentsInTemplate(template);
-
-    if (templateComponents.message === "Error") {
-      res.status(404).json(templateComponents);
-    }
-
-    // Replace the component refs with the actual component data in template.content
-    template = await replaceComponentRefs(template, templateComponents.components);
-
-    // Merge the page data with the template data
-    const mergedTemplate = template.content[0].map((block: any) => {
-      if (block.placeholder && block.placeholder === page.slot) {
-        block.content = page.content;
-        delete (block as any).placeholder;
-      }
-
-      return block;
-    });
-
-    page.content = mergedTemplate;
+  if (results.components!.length > 0) {
+    // Find all components in Database by componentRef
+    const dbComponents = await Component.find({ id: { $in: results.components.map((component: any) => component.componentRef) } });
+    page.content = replaceComponentRefs(page.content, dbComponents);
   }
 
   res.status(200).json({

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-import { renderPageHTML } from "../../libs/template";
+import { renderPageHTML } from "../../libs/renderer";
 import Template from "../../models/Template";
 
 async function get(req: Request, res: Response) {

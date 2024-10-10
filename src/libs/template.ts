@@ -1,30 +1,39 @@
-import { JSONToHTML } from "html-to-json-parser";
-import ejs from "ejs";
-
-import Content from "../models/Component";
-import { ContentBody, RepeatableData } from "../types/Content";
+type Content = string | ContentBody; // Content can be a string or an object
+type ContentBody = {
+  type: string;
+  ref?: string;
+  content?: Content[];
+};
 
 /**
- * Get all components in a page.
+ * Recursively find all components in a template and return them in an array for further processing.
  * @param data
  * @returns
  */
-const getComponentsInTemplate = async (data: any) => {
-  const componentRefs = data.content[0].content.filter((c: any) => c.type === "component");
+const getComponentsInTemplate = async (content: Array<ContentBody>) => {
+  let components: any[] = [];
 
-  const components = await Content.find({
-    type: "component",
-    ref: { $in: componentRefs.map((c: any) => c.ref) },
-  });
+  function traverseContent(content: string | ContentBody) {
+    if (typeof content === "string") return;
 
-  // Check if each component exists
-  const missingComponents = componentRefs.filter((c: any) => !components.find((comp: any) => comp.ref === c.ref));
+    if (typeof content === "object" && content.type === "component") {
+      components.push(content);
+    }
 
-  if (missingComponents.length > 0) {
-    return { message: "Error", error: "Component not found", components: missingComponents };
+    if (typeof content === "object" && Array.isArray(content.content)) {
+      content.content.forEach(traverseContent);
+    }
   }
 
-  return { message: "Success", components };
+  // Start traversal with the top-level content array
+  if (Array.isArray(content)) {
+    content.forEach(traverseContent);
+  }
+
+  return {
+    message: "Success",
+    components,
+  };
 };
 
 /**
@@ -33,136 +42,34 @@ const getComponentsInTemplate = async (data: any) => {
  * @param components
  * @returns
  */
-const replaceComponentRefs = async (data: any, components: any) => {
-  // Replace the component refs with the actual component data in page.content
-  data.content[0].content = await Promise.all(
-    data.content[0].content.map((c: any) => {
-      if (c.type === "component") {
-        const component = components.find((comp: any) => comp.ref === c.ref);
+const replaceComponentRefs = (content: Content[], components: ContentBody[]): Content[] => {
+  // Traverse and replace component references in the content
+  function traverseContent(item: Content): Content {
+    if (typeof item === "string") return item; // Base case: if it's a string, return it as is
 
-        return component.content[0];
+    if (item.type === "component" && item.ref) {
+      // Find the corresponding component from the components array by ref
+      const component = components.find(c => c.ref === item.ref);
+      if (component && component.content) {
+        // Recursively process and replace the component's content
+        // @ts-ignore
+        return component.content.map(traverseContent) as Content[]; // Ensure recursion
       }
-
-      return c;
-    })
-  );
-
-  return data;
-};
-
-/**
- * Render the given page data into HTML using ejs templates.
- * @param data
- * @returns
- */
-const renderPageHTML = async (data: any) => {
-  // Turn the page content into HTML
-  const tempHTML = await JSONToHTML(data.content[0]);
-
-  // Replace template variables with actual data
-  const template = ejs.compile(tempHTML as string);
-  return template(data.data);
-};
-
-/**
- * Recursively find all repeatable content objects in a content array and return them in an array for further processing.
- * @param contentArray
- * @returns
- */
-const findRepeatableContent = async (contentArray: Array<string | ContentBody>): Promise<ContentBody[]> => {
-  let repeatableItems: ContentBody[] = [];
-
-  // Helper function to recursively traverse content fields
-  function traverseContent(content: string | ContentBody) {
-    if (typeof content === "object" && "repeatable" in content) {
-      // If the content is an object and has the "repeatable" field, add it to the array
-      repeatableItems.push(content);
     }
 
-    // If the content is an object and contains nested content, recursively process it
-    if (typeof content === "object" && Array.isArray(content.content)) {
-      content.content.forEach(traverseContent); // Recursively process nested content
+    if (Array.isArray(item.content)) {
+      // If the content is an array, recursively traverse each item
+      return {
+        ...item,
+        content: item.content.map(traverseContent),
+      };
     }
+
+    return item; // Return the content unchanged if it's not a component or array
   }
 
-  // Start traversal with the top-level content array
-  contentArray.forEach(traverseContent);
-
-  return repeatableItems; // Return the array of repeatable content objects
+  // Start traversal with the top-level content array and return the modified array
+  return content.map(traverseContent).flat(Infinity);
 };
 
-/**
- * Build repeatable content from a repeatable content object.
- */
-const buildRepeatableContent = async (template: ContentBody, data: RepeatableData[]) => {
-  let newContentArray: ContentBody[] = [];
-
-  let repeatable = template.repeatable;
-
-  data.forEach(item => {
-    // Clone the template object for each item in the data array
-    const clonedItem: ContentBody = JSON.parse(JSON.stringify(template));
-
-    // Ensure there is an "a" tag in the content to modify
-    const anchorElement = clonedItem.content[0];
-
-    // Delete "repeatable" field from the cloned object
-    if ("repeatable" in clonedItem) {
-      delete clonedItem.repeatable;
-    }
-
-    // Replace the placeholder with the actual data
-    if (typeof anchorElement === "string") {
-      clonedItem.content[0] = item.key;
-    }
-
-    // If the content is an object and is an anchor element
-    if (typeof anchorElement === "object" && anchorElement.type === "a") {
-      // Replace the href placeholder ':value' with the actual slug
-      if (anchorElement.attributes && anchorElement.attributes.href) {
-        anchorElement.attributes.href = anchorElement.attributes.href.replace(":value", item.value);
-      }
-
-      // Replace the content (anchor text) with the name
-      anchorElement.content = [item.key];
-    }
-
-    // Add the newly populated object to the array
-    newContentArray.push(clonedItem);
-  });
-
-  return {
-    type: template.type,
-    repeatable,
-    content: newContentArray,
-  };
-};
-
-/**
- * Insert repeatable content into the content array.
- */
-const insertRepeatableContent = async (contentArray: Array<string | ContentBody>, repeatableContent: ContentBody[], repeatableKey: string) => {
-  // Helper function to recursively traverse content fields, keeping track of the parent
-  function traverseContent(content: string | ContentBody, parent: ContentBody | null = null, parentIndex: number | null = null) {
-    if (typeof content === "object" && "repeatable" in content && content.repeatable === repeatableKey) {
-      // If the content has the "repeatable" field, replace the parent's content array at the appropriate index
-      if (parent && parentIndex !== null) {
-        parent.content.splice(parentIndex, 1, ...repeatableContent); // Replace the parent's content array with the repeatable content
-      }
-    }
-
-    // If the content has nested content, recursively process it
-    if (typeof content === "object" && Array.isArray(content.content)) {
-      content.content.forEach((childContent, index) => {
-        traverseContent(childContent, content, index); // Pass the current content as the parent
-      });
-    }
-  }
-
-  // Start traversal with the top-level content array
-  contentArray.forEach((content, index) => traverseContent(content, null, index));
-
-  return contentArray; // Return the updated content array
-};
-
-export { getComponentsInTemplate, replaceComponentRefs, renderPageHTML, findRepeatableContent, buildRepeatableContent, insertRepeatableContent };
+export { getComponentsInTemplate, replaceComponentRefs };

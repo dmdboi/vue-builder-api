@@ -14,6 +14,7 @@ router.get("/components/:id/html", ComponentController.getHTML);
 router.get("/pages", PageController.list);
 router.post("/pages", PageController.store);
 router.get("/pages/:id", PageController.get);
+router.put("/pages/:id", PageController.update);
 router.get("/pages/:id/html", PageController.getHTML);
 
 router.get("/templates", TemplateController.list);

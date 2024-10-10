@@ -1,12 +1,13 @@
-import { get, getHTML } from "./get";
 import list from "./list";
-import store from "./store";
+import { get, getHTML } from "./get";
+import { store, update } from "./store";
 
 const PageController = {
   get,
   getHTML,
   list,
-  store
+  store,
+  update,
 };
 
 export default PageController;

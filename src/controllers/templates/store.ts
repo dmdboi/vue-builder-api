@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import ULID from "ulid";
 
 import Template from "../../models/Template";
+import { getComponentsInTemplate } from "../../libs/template";
+import TemplateComponent from "../../models/TemplateComponent";
 
 async function store(req: Request, res: Response) {
   // Check that type is set to "page"
@@ -17,6 +19,21 @@ async function store(req: Request, res: Response) {
     id: ULID.ulid(),
     ...req.body,
   });
+
+  // Scan through components and save them to MongoDB
+  const templateComponents = await getComponentsInTemplate(req.body.content);
+
+  if (templateComponents.components) {
+    await Promise.all(
+      templateComponents.components.map(async (component: any) => {
+        await TemplateComponent.create({
+          id: ULID.ulid(),
+          template_id: template.id,
+          component_id: component.id,
+        });
+      })
+    );
+  }
 
   res.status(200).json({
     message: "Success",
