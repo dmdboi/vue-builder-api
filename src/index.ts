@@ -1,6 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
+import cors from "cors";
 
 dotenv.config();
 
@@ -10,6 +11,7 @@ import { connectMongo } from "./libs/database";
 const app = express();
 
 app.use(bodyParser.json());
+app.use(cors());
 app.use(router);
 
 app.use((req, res, next) => {
