@@ -12,9 +12,14 @@ const app = express();
 app.use(bodyParser.json());
 app.use(router);
 
+app.use((req, res, next) => {
+  console.log("[ Server ] Requested: ", req.method, req.url);
+  next();
+});
+
 async function startExpress() {
-  app.listen(3000, async () => {
-    console.log("[ Server ] Running on port 3000");
+  app.listen(process.env.PORT, async () => {
+    console.log("[ Server ] Running on port ", process.env.PORT);
   });
 }
 

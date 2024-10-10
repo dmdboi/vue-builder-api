@@ -1,9 +1,12 @@
 import { Request, Response } from "express";
-import ULID from "ulid";
+import { ulid } from "ulid";
 
 import { buildRepeatableContent, findRepeatableContent, insertRepeatableContent } from "../../libs/components";
+import Component from "../../models/Component";
 
 async function store(req: Request, res: Response) {
+  console.log(req.body);
+
   const results = await findRepeatableContent(req.body.content);
 
   const buildableResult = await Promise.all(results.map(async result => await buildRepeatableContent(result, req.body.data.menu)));
@@ -19,9 +22,12 @@ async function store(req: Request, res: Response) {
   const component = {
     ...req.body,
     type: "component",
-    id: ULID.ulid(),
+    id: ulid(),
     content: flatOutputResult,
   };
+
+  // Save the component to the database
+  await Component.create(component);
 
   res.status(200).json({
     message: "Success",

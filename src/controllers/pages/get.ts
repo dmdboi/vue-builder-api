@@ -1,11 +1,10 @@
 import { Request, Response } from "express";
 
-import Content from "../../models/Component";
+import Component from "../../models/Component";
 import Page from "../../models/Page";
 
 import { getComponentsInTemplate, replaceComponentRefs } from "../../libs/template";
 import { renderPageHTML } from "../../libs/renderer";
-import Component from "../../models/Component";
 
 async function get(req: Request, res: Response) {
   const { id } = req.params;
@@ -28,7 +27,7 @@ async function get(req: Request, res: Response) {
 
   if (results.components!.length > 0) {
     // Find all components in Database by componentRef
-    const dbComponents = await Component.find({ id: { $in: results.components.map((component: any) => component.componentRef) } });
+    const dbComponents = await Component.find({ ref: { $in: results.components.map((component: any) => component.ref) } });
     page.content = replaceComponentRefs(page.content, dbComponents);
   }
 
@@ -42,7 +41,7 @@ async function getHTML(req: Request, res: Response) {
   const { id } = req.params;
 
   // Find the content in MongoDB
-  let data = await Content.findOne({ type: "page", id: id });
+  let data = await Component.findOne({ type: "page", id: id });
 
   const components = await getComponentsInTemplate(data);
 
@@ -50,7 +49,7 @@ async function getHTML(req: Request, res: Response) {
     res.status(404).json(components);
   }
 
-  data = await replaceComponentRefs(data, components.components);
+  data = replaceComponentRefs(data, components.components);
 
   // Turn the page content into HTML
   const html = await renderPageHTML(data);

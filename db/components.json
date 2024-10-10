@@ -60,20 +60,22 @@
         "type": "component",
         "name": "header",
         "ref": "header",
-        "content": {
-            "type": "header",
-            "content": [
-                {
-                    "type": "h1",
-                    "content": [
-                        "<%= title %>"
-                    ]
+        "content": [
+            {
+                "type": "header",
+                "content": [
+                    {
+                        "type": "h1",
+                        "content": [
+                            "<%= title %>"
+                        ]
+                    }
+                ],
+                "attributes": {
+                    "class": "blog-header"
                 }
-            ],
-            "attributes": {
-                "class": "blog-header"
             }
-        }
+        ]
     },
     {
         "id": "3",

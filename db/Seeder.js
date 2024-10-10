@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 const fs = require("fs");
-const { MongoClient } = require("mongodb");
 const path = require("path");
+const http = require("http");
 const dotenv = require("dotenv");
 
 // Load environment variables from .env file
@@ -15,20 +15,9 @@ if (!collectionName) {
   process.exit(1);
 }
 
-const uri = process.env.MONGO_DB_URL;
-
-// Function to seed the database
+// Function to seed the database via HTTP POST request
 async function seedDatabase() {
-  const client = new MongoClient(uri);
-
   try {
-    // Connect to MongoDB
-    await client.connect();
-    console.log("Connected to MongoDB");
-
-    const db = client.db("test");
-    const collection = db.collection(collectionName);
-
     // Read and parse the JSON file
     const filePath = path.resolve(`./db/${collectionName}.json`);
     const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -38,17 +27,51 @@ async function seedDatabase() {
       process.exit(1);
     }
 
-    // Insert data into the collection
-    const result = await collection.insertMany(data);
-    console.log(`Inserted ${result.insertedCount} documents into the collection '${collectionName}'`);
+    // For each object in the JSON file, send an HTTP POST request
+    for (const item of data) {
+      const response = await sendPostRequest(`/${collectionName}`, item);
+      console.log(response);
+    }
   } catch (err) {
     console.error("Error occurred while seeding the database:", err);
   } finally {
-    // Close the MongoDB connection
-    await client.close();
-    console.log("Connection to MongoDB closed");
+    console.log("Database seeding completed.");
+    process.exit(0);
   }
 }
 
 // Run the seeder
 seedDatabase();
+
+async function sendPostRequest(path, data) {
+  const options = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    hostname: "localhost",
+    port: process.env.PORT,
+    path,
+  };
+
+  return new Promise((resolve, reject) => {
+    const req = http.request(options, res => {
+      let data = "";
+
+      res.on("data", chunk => {
+        data += chunk;
+      });
+
+      res.on("end", () => {
+        resolve(data);
+      });
+    });
+
+    req.on("error", err => {
+      reject(err);
+    });
+
+    req.write(JSON.stringify(data));
+    req.end();
+  });
+}
