@@ -9,6 +9,7 @@ const router = Router();
 router.get("/components", ComponentController.list);
 router.post("/components", ComponentController.store);
 router.get("/components/:id", ComponentController.get);
+router.put("/components/:id", ComponentController.update);
 router.get("/components/:id/html", ComponentController.getHTML);
 
 router.get("/pages", PageController.list);

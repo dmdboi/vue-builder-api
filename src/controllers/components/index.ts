@@ -1,4 +1,4 @@
-import store from "./store";
+import { store, update } from "./store";
 import list from "./list";
 import { get, getHTML } from "./get";
 
@@ -7,6 +7,7 @@ const ComponentController = {
   list,
   get,
   getHTML,
+  update,
 };
 
 export default ComponentController;
