@@ -8,6 +8,10 @@ import { ContentBody, RepeatableData } from "../types/Content";
 const findRepeatableContent = async (contentArray: Array<string | ContentBody>): Promise<ContentBody[]> => {
   let repeatableItems: ContentBody[] = [];
 
+  if (!Array.isArray(contentArray)) {
+    return repeatableItems;
+  }
+
   // Helper function to recursively traverse content fields
   function traverseContent(content: string | ContentBody) {
     if (typeof content === "object" && "repeatable" in content) {

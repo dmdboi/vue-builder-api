@@ -34,8 +34,6 @@ async function store(req: Request, res: Response) {
 }
 
 async function update(req: Request, res: Response) {
-  console.log(req.body);
-
   let payload = req.body;
 
   const results = await findRepeatableContent(req.body.content);
@@ -56,7 +54,7 @@ async function update(req: Request, res: Response) {
     };
   }
 
-  const component = await Component.updateOne(
+  await Component.updateOne(
     { id: req.params.id },
     {
       $set: payload,
@@ -65,7 +63,7 @@ async function update(req: Request, res: Response) {
 
   res.status(200).json({
     message: "Success",
-    data: component,
+    data: payload,
   });
 }
 
