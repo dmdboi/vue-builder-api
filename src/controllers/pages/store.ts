@@ -1,33 +1,55 @@
 import { Request, Response } from "express";
 import ULID from "ulid";
 import Page from "../../models/Page";
+import { replaceComponentsInPageRequest } from "../../libs/template";
 
 async function store(req: Request, res: Response) {
-  // Check that type is set to "page"
-  if (req.body.type !== "page") {
+  const { name, content } = req.body;
+
+  // Check if content array has only one element
+  if (content.length > 1) {
     res.status(400).json({
       message: "Error",
-      data: "Type must be set to 'page'",
+      error: "Content array must have only one element",
     });
   }
 
+  // Traverse the content array finding all components based on the is_component key
+  const components = replaceComponentsInPageRequest(content);
+
+  console.log(components);
+
+  const ref = name.toLowerCase().replace(/ /g, "-");
+
   // Build component content
-  const component = {
+  const page = {
     id: ULID.ulid(),
-    ...req.body,
+    ref: ref,
+    name: req.body.name,
+    content: req.body.content,
   };
 
   // Save page to MongoDB
-  await Page.create(component);
+  await Page.create(page);
 
   res.status(200).json({
     message: "Success",
-    data: component,
+    data: page,
   });
 }
 
 async function update(req: Request, res: Response) {
   const { id } = req.params;
+
+  const { name, content } = req.body;
+
+  // Check if content array has only one element
+  if (content.length > 1) {
+    res.status(400).json({
+      message: "Error",
+      error: "Content array must have only one element",
+    });
+  }
 
   // Find the page by ID
   const page = await Page.findOne({ id: id });
@@ -39,12 +61,31 @@ async function update(req: Request, res: Response) {
     });
   }
 
+  const newref = name.toLowerCase().replace(/ /g, "-");
+
+  // Traverse the content array finding all components based on the is_component key
+  const cleanedContent = replaceComponentsInPageRequest(content);
+
   // Update the page in MongoDB
-  await Page.updateOne({ id: id }, req.body);
+  await Page.updateOne(
+    { id: id },
+    {
+      $set: {
+        name,
+        ref: newref,
+        content: cleanedContent,
+      },
+    }
+  );
 
   res.status(200).json({
     message: "Success",
-    data: req.body,
+    data: {
+      id: id,
+      ref: page.ref,
+      name: page.name,
+      content: cleanedContent,
+    },
   });
 }
 

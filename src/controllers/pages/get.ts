@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import Component from "../../models/Component";
 import Page from "../../models/Page";
 
-import { getComponentsInTemplate, replaceComponentRefs } from "../../libs/template";
+import { getComponentsInTemplate, restoreComponentsInPageRequest } from "../../libs/template";
 import { renderPageHTML } from "../../libs/renderer";
 
 async function get(req: Request, res: Response) {
@@ -19,6 +19,10 @@ async function get(req: Request, res: Response) {
     });
   }
 
+  console.log({
+    get: page.content[0].content,
+  });
+
   const results = await getComponentsInTemplate(page.content);
 
   if (results.message === "Error") {
@@ -28,7 +32,7 @@ async function get(req: Request, res: Response) {
   if (results.components!.length > 0) {
     // Find all components in Database by componentRef
     const dbComponents = await Component.find({ ref: { $in: results.components.map((component: any) => component.ref) } });
-    page.content = replaceComponentRefs(page.content, dbComponents);
+    page.content = restoreComponentsInPageRequest(page.content, dbComponents);
   }
 
   res.status(200).json({
@@ -49,7 +53,7 @@ async function getHTML(req: Request, res: Response) {
     res.status(404).json(components);
   }
 
-  data = replaceComponentRefs(data, components.components);
+  data = restoreComponentsInPageRequest(data, components.components);
 
   // Turn the page content into HTML
   const html = await renderPageHTML(data);

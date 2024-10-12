@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 
 import { renderPageHTML } from "../../libs/renderer";
 import Template from "../../models/Template";
-import { getComponentsInTemplate, replaceComponentRefs } from "../../libs/template";
+import { getComponentsInTemplate, restoreComponentsInPageRequest } from "../../libs/template";
 import Component from "../../models/Component";
 
 async function get(req: Request, res: Response) {
@@ -20,7 +20,7 @@ async function get(req: Request, res: Response) {
   if (results.components!.length > 0) {
     // Find all components in Database by componentRef
     const dbComponents = await Component.find({ id: { $in: results.components.map((component: any) => component.componentRef) } });
-    template.content = replaceComponentRefs(template.content, dbComponents);
+    template.content = restoreComponentsInPageRequest(template.content, dbComponents);
   }
 
   res.status(200).json({

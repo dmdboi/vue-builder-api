@@ -5,6 +5,41 @@ type ContentBody = {
   content?: Content[];
 };
 
+const replaceComponentsInPageRequest = (content: any): any => {
+  function traverseContent(content: any): any {
+    // If the content is an array, traverse each element and flatten nested arrays
+    if (Array.isArray(content)) {
+      // We ensure that each item in the array is an object
+      return content.map(traverseContent).flat();
+    }
+
+    // If the content is a string, return it as is
+    if (typeof content === "string") {
+      return content;
+    }
+
+    // If the content is an object and has the is_component key, replace it
+    if (typeof content === "object" && content.is_component) {
+      return {
+        type: "component",
+        ref: content.ref,
+      };
+    }
+
+    // If the content is an object and has a content key, recursively traverse the content array
+    if (typeof content === "object" && Array.isArray(content.content)) {
+      return {
+        ...content,
+        content: traverseContent(content.content), // Flatten inner arrays
+      };
+    }
+
+    return content; // return any other object unchanged
+  }
+
+  return traverseContent(content); // Start the recursion from the root content
+};
+
 /**
  * Recursively find all components in a template and return them in an array for further processing.
  * @param data
@@ -42,34 +77,38 @@ const getComponentsInTemplate = async (content: Array<ContentBody>) => {
  * @param components
  * @returns
  */
-const replaceComponentRefs = (content: Content[], components: ContentBody[]): Content[] => {
-  // Traverse and replace component references in the content
-  function traverseContent(item: Content): Content {
-    if (typeof item === "string") return item; // Base case: if it's a string, return it as is
+const restoreComponentsInPageRequest = (content: any[], components: any[]) => {
+  function traverseContent(content: any): any {
+    // If the content is an array, traverse each element
+    if (Array.isArray(content)) {
+      return content.map(traverseContent);
+    }
 
-    if (item.type === "component" && item.ref) {
-      // Find the corresponding component from the components array by ref
-      const component = components.find(c => c.ref === item.ref);
-      if (component && component.content) {
-        // Recursively process and replace the component's content
-        // @ts-ignore
-        return component.content.map(traverseContent) as Content[]; // Ensure recursion
+    // If the content is a string, return it as is
+    if (typeof content === "string") {
+      return content;
+    }
+
+    // If the content is an object and is a component placeholder, find the corresponding component
+    if (typeof content === "object" && content.type === "component" && content.ref) {
+      const foundComponent = components.find(component => component.ref === content.ref);
+      if (foundComponent) {
+        return foundComponent.content[0]; // Replace with the actual component
       }
     }
 
-    if (Array.isArray(item.content)) {
-      // If the content is an array, recursively traverse each item
+    // If the content is an object and has a content key, recursively traverse the content array
+    if (typeof content === "object" && Array.isArray(content.content)) {
       return {
-        ...item,
-        content: item.content.map(traverseContent),
+        ...content,
+        content: traverseContent(content.content), // Recursively handle content arrays
       };
     }
 
-    return item; // Return the content unchanged if it's not a component or array
+    return content; // return any other object unchanged
   }
 
-  // Start traversal with the top-level content array and return the modified array
-  return content.map(traverseContent).flat(Infinity);
+  return traverseContent(content); // Start the recursion from the root content
 };
 
-export { getComponentsInTemplate, replaceComponentRefs };
+export { replaceComponentsInPageRequest, getComponentsInTemplate, restoreComponentsInPageRequest };
