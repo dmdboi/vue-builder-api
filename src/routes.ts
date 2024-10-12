@@ -9,8 +9,15 @@ import { validator } from "./middleware/validator";
 import { CreateComponentValidator, UpdateComponentValidator } from "./validators/ComponentValidators";
 import { CreatePageValidatora, UpdatePageValidator } from "./validators/PageValidators";
 import { CreateTemplateValidator } from "./validators/TemplateValidators";
+import SiteController from "./controllers/sites";
+import { CreateSiteValidator, UpdateSiteValidator } from "./validators/SiteValidators";
 
 const router = Router();
+
+router.post("/site", validator(CreateSiteValidator), SiteController.store);
+router.get("/site/:id", SiteController.get);
+router.put("/site/:id", validator(UpdateSiteValidator), SiteController.update);
+router.get("/site/:id/html", SiteController.getHTML);
 
 router.get("/components", ComponentController.list);
 router.post("/components", validator(CreateComponentValidator), ComponentController.store);
@@ -27,7 +34,6 @@ router.get("/pages/:id/html", PageController.getHTML);
 router.get("/templates", TemplateController.list);
 router.post("/templates", validator(CreateTemplateValidator), TemplateController.store);
 router.get("/templates/:id", TemplateController.get);
-// TODO: Implement update for templates
 router.get("/templates/:id/html", TemplateController.getHTML);
 
 export default router;
