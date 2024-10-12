@@ -6,7 +6,7 @@ const TemplateController = {
   get,
   getHTML,
   list,
-  store
+  store,
 };
 
 export default TemplateController;

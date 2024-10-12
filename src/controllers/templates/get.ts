@@ -18,8 +18,7 @@ async function get(req: Request, res: Response) {
   }
 
   if (results.components!.length > 0) {
-    // Find all components in Database by componentRef
-    const dbComponents = await Component.find({ id: { $in: results.components.map((component: any) => component.componentRef) } });
+    const dbComponents = await Component.find({ id: { $in: results.components!.map((component: any) => component.componentRef) } });
     template.content = restoreComponentsInPageRequest(template.content, dbComponents);
   }
 
@@ -33,10 +32,21 @@ async function getHTML(req: Request, res: Response) {
   const { id } = req.params;
 
   // Find the content in MongoDB
-  let data = await Template.findOne({ id: id });
+  let template = await Template.findOne({ id: id });
+
+  const results = await getComponentsInTemplate(template.content);
+
+  if (results.message === "Error") {
+    res.status(404).json(results);
+  }
+
+  if (results.components!.length > 0) {
+    const dbComponents = await Component.find({ ref: { $in: results.components!.map((component: any) => component.ref) } });
+    template.content = restoreComponentsInPageRequest(template.content, dbComponents);
+  }
 
   // Turn the page content into HTML
-  const html = await renderPageHTML(data);
+  const html = await renderPageHTML(template);
 
   res.status(200).send(html);
 }

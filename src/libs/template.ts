@@ -41,11 +41,16 @@ const replaceComponentsInPageRequest = (content: any): any => {
 };
 
 /**
- * Recursively find all components in a template and return them in an array for further processing.
+ * Recursively find all components in a content array and return them in an array for further processing.
  * @param data
  * @returns
  */
-const getComponentsInTemplate = async (content: Array<ContentBody>) => {
+const getComponentsInTemplate = async (
+  content: Array<ContentBody>
+): Promise<{
+  message: string;
+  components?: any[];
+}> => {
   let components: any[] = [];
 
   function traverseContent(content: string | ContentBody) {

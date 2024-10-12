@@ -6,18 +6,8 @@ import { replaceComponentsInPageRequest } from "../../libs/template";
 async function store(req: Request, res: Response) {
   const { name, content } = req.body;
 
-  // Check if content array has only one element
-  if (content.length > 1) {
-    res.status(400).json({
-      message: "Error",
-      error: "Content array must have only one element",
-    });
-  }
-
   // Traverse the content array finding all components based on the is_component key
-  const components = replaceComponentsInPageRequest(content);
-
-  console.log(components);
+  const cleanedContent = replaceComponentsInPageRequest(content);
 
   const ref = name.toLowerCase().replace(/ /g, "-");
 
@@ -25,8 +15,8 @@ async function store(req: Request, res: Response) {
   const page = {
     id: ULID.ulid(),
     ref: ref,
-    name: req.body.name,
-    content: req.body.content,
+    name: name,
+    content: cleanedContent,
   };
 
   // Save page to MongoDB
@@ -42,14 +32,6 @@ async function update(req: Request, res: Response) {
   const { id } = req.params;
 
   const { name, content } = req.body;
-
-  // Check if content array has only one element
-  if (content.length > 1) {
-    res.status(400).json({
-      message: "Error",
-      error: "Content array must have only one element",
-    });
-  }
 
   // Find the page by ID
   const page = await Page.findOne({ id: id });

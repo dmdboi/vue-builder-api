@@ -4,7 +4,7 @@ interface Template {
   id: string;
   name: string;
   ref: string;
-  content: Content[] | string[];
+  content: Content[];
   data: Record<string, any>;
   meta: Record<string, any>;
 

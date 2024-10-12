@@ -19,10 +19,6 @@ async function get(req: Request, res: Response) {
     });
   }
 
-  console.log({
-    get: page.content[0].content,
-  });
-
   const results = await getComponentsInTemplate(page.content);
 
   if (results.message === "Error") {
@@ -30,8 +26,7 @@ async function get(req: Request, res: Response) {
   }
 
   if (results.components!.length > 0) {
-    // Find all components in Database by componentRef
-    const dbComponents = await Component.find({ ref: { $in: results.components.map((component: any) => component.ref) } });
+    const dbComponents = await Component.find({ ref: { $in: results.components!.map((component: any) => component.ref) } });
     page.content = restoreComponentsInPageRequest(page.content, dbComponents);
   }
 
@@ -45,18 +40,21 @@ async function getHTML(req: Request, res: Response) {
   const { id } = req.params;
 
   // Find the content in MongoDB
-  let data = await Component.findOne({ type: "page", id: id });
+  let page = await Page.findOne({ id: id });
 
-  const components = await getComponentsInTemplate(data);
+  const results = await getComponentsInTemplate(page.content);
 
-  if (components.message === "Error") {
-    res.status(404).json(components);
+  if (results.message === "Error") {
+    res.status(404).json(results);
   }
 
-  data = restoreComponentsInPageRequest(data, components.components);
+  if (results.components!.length > 0) {
+    const dbComponents = await Component.find({ ref: { $in: results.components!.map((component: any) => component.ref) } });
+    page.content = restoreComponentsInPageRequest(page.content, dbComponents);
+  }
 
   // Turn the page content into HTML
-  const html = await renderPageHTML(data);
+  const html = await renderPageHTML(page);
 
   res.status(200).send(html);
 }
