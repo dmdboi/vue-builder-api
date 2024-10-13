@@ -15,7 +15,7 @@ import { CreateSiteValidator, UpdateSiteValidator } from "./validators/SiteValid
 const router = Router();
 
 router.post("/site", validator(CreateSiteValidator), SiteController.store);
-router.get("/site/:id", SiteController.get);
+router.get("/site", SiteController.get);
 router.put("/site/:id", validator(UpdateSiteValidator), SiteController.update);
 router.get("/site/:id/html", SiteController.getHTML);
 
