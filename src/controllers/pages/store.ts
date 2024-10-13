@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import ULID from "ulid";
+import { ulid } from "ulid";
 import Page from "../../models/Page";
 import { replaceComponentsInPageRequest } from "../../libs/template";
 
@@ -13,7 +13,7 @@ async function store(req: Request, res: Response) {
 
   // Build component content
   const page = {
-    id: ULID.ulid(),
+    id: ulid(),
     ref: ref,
     name: name,
     content: cleanedContent,

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import ULID from "ulid";
+import { ulid } from "ulid";
 
 import Template from "../../models/Template";
 import { getComponentsInTemplate } from "../../libs/template";
@@ -16,7 +16,7 @@ async function store(req: Request, res: Response) {
 
   // Save template to MongoDB
   const template = await Template.create({
-    id: ULID.ulid(),
+    id: ulid(),
     ...req.body,
   });
 
@@ -27,7 +27,7 @@ async function store(req: Request, res: Response) {
     await Promise.all(
       templateComponents.components.map(async (component: any) => {
         await TemplateComponent.create({
-          id: ULID.ulid(),
+          id: ulid(),
           template_id: template.id,
           component_id: component.id,
         });

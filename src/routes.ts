@@ -1,17 +1,17 @@
 import { Router } from "express";
+import { HTMLToJSON, JSONToHTML } from "html-to-json-parser";
 
 import ComponentController from "./controllers/components";
 import TemplateController from "./controllers/templates";
 import PageController from "./controllers/pages";
+import SiteController from "./controllers/sites";
 
 import { validator } from "./middleware/validator";
 
 import { CreateComponentValidator, UpdateComponentValidator } from "./validators/ComponentValidators";
 import { CreatePageValidatora, UpdatePageValidator } from "./validators/PageValidators";
-import { CreateTemplateValidator } from "./validators/TemplateValidators";
-import SiteController from "./controllers/sites";
 import { CreateSiteValidator, UpdateSiteValidator } from "./validators/SiteValidators";
-import { HTMLToJSON, JSONToHTML } from "html-to-json-parser";
+import { CreateTemplateValidator } from "./validators/TemplateValidators";
 
 const router = Router();
 

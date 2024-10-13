@@ -17,3 +17,4 @@
 
 - [X] Image component does not render images
 - [X] NestedRenderer needs splitting into separate components to support Pages and Components differently
+- [ ] When saving a Page, components are not resolved in response so disappear from the page
