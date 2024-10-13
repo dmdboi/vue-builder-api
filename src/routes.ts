@@ -11,6 +11,7 @@ import { CreatePageValidatora, UpdatePageValidator } from "./validators/PageVali
 import { CreateTemplateValidator } from "./validators/TemplateValidators";
 import SiteController from "./controllers/sites";
 import { CreateSiteValidator, UpdateSiteValidator } from "./validators/SiteValidators";
+import { HTMLToJSON, JSONToHTML } from "html-to-json-parser";
 
 const router = Router();
 
@@ -35,5 +36,34 @@ router.get("/templates", TemplateController.list);
 router.post("/templates", validator(CreateTemplateValidator), TemplateController.store);
 router.get("/templates/:id", TemplateController.get);
 router.get("/templates/:id/html", TemplateController.getHTML);
+
+router.post("/utils/json-to-html", async (req, res) => {
+  if (!req.body) {
+    res.status(400).json({
+      message: "Missing body",
+    });
+  }
+
+  const html = await JSONToHTML(req.body);
+
+  res.status(200).send(html);
+});
+
+router.post("/utils/html-to-json", async (req, res) => {
+  const { html } = req.body;
+
+  if (!html) {
+    res.status(400).json({
+      message: "Missing html",
+    });
+  }
+
+  const data = await HTMLToJSON(html);
+
+  res.status(200).json({
+    message: "Success",
+    data,
+  });
+});
 
 export default router;
