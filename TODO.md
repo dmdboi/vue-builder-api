@@ -12,3 +12,8 @@
 - [ ] File upload support (local, R2 or S3 storage)
 - [ ] Support for exporting site data (e.g. pages, templates, users, teams) to a JSON file
 - [ ] Docs
+
+## Bugs
+
+- [ ] Image component does not render images
+- [ ] NestedRenderer needs splitting into separate components to support Pages and Components differently
