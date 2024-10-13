@@ -2,10 +2,15 @@ import { Request, Response } from "express";
 import { ulid } from "ulid";
 
 import Component from "../../models/Component";
+import { HTMLToJSON } from "html-to-json-parser";
 
 async function store(req: Request, res: Response) {
   // Modify first element of content array
   const ref = req.body.name.toLowerCase().replace(/ /g, "-");
+
+  if (typeof req.body.content[0] === "string") {
+    req.body.content = [await HTMLToJSON(req.body.content)];
+  }
 
   let element = req.body.content[0];
 

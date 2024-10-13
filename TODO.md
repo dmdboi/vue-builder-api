@@ -15,5 +15,5 @@
 
 ## Bugs
 
-- [ ] Image component does not render images
-- [ ] NestedRenderer needs splitting into separate components to support Pages and Components differently
+- [X] Image component does not render images
+- [X] NestedRenderer needs splitting into separate components to support Pages and Components differently
